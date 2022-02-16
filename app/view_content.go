@@ -3,7 +3,7 @@ package app
 var ViewContentTemplate = `
 {{ $a := "{{ define \"content\" }}" }}
 {{- $a }}
-<div>内容页</div>
+<div>{{ $c := "{{ .title }}" }}{{ $c }}</div>
 {{ $b := "{{ end }}" }}
 {{- $b }}
 `

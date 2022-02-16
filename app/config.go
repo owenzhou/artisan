@@ -2,7 +2,7 @@ package app
 
 var ConfigTemplate = `
 #生成代码的配置
-controllerPath: app/http/controllers/backend
+controllerPath: app/http/controllers
 modelPath: app/models
 eventPath: app/events
 listenerPath: app/listeners
@@ -10,22 +10,13 @@ listenerPath: app/listeners
 #---------------------------
 debug: true
 
-appName: "后台管理系统"
+appName: "My App"
 
-#模板,不使用map保证从第一个元素执行
 template:
   -
-    modulename: "backend"
-    layout: "views/layouts/backend.html"
-    viewpath: "views/backend/admin/home.html"
-  -
-    modulename: "block"
-    layout: "views/layouts/block.html"
-    viewpath: "views/fronend/auth/*.html;views/backend/auth/*.html;views/backend/common/*.html;views/backend/**/*.html"
-  -
     modulename: "fronend"
-    layout: "views/layouts/fronend.html"
-    viewpath: "views/fronend/**/*.html"
+    layout: "views/layouts/layout.html"
+    viewpath: "views/home/*.html"
 
 #用户登录
 auth:

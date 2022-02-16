@@ -291,18 +291,44 @@ func newApp(name string) string {
 	}
 	//创建一个默认的控制器
 	ctrlPath := "app/http/controllers/HomeController.go"
-	ctrlName, err := makeTplFile(ctrlPath, app.CtrlTemplate, map[string]interface{}{})
+	ctrlName, err := makeTplFile(ctrlPath, app.CtrlTemplate, map[string]interface{}{"packageName": "controllers"})
 	if err != nil {
 		fmt.Println(ctrlName + " create failed.")
 	} else {
 		fmt.Println(ctrlName + " created.")
 	}
-	//创建config目录
-	os.MkdirAll("config", 0755)
+	//创建控制器服务
+	ctrlProviderName, err := makeTplFile("app/providers/ControllerServiceProvider.go", app.CtrlProviderTemplate, map[string]interface{}{"moduleName": name})
+	if err != nil {
+		fmt.Println(ctrlProviderName + " create failed.")
+	} else {
+		fmt.Println(ctrlProviderName + " created.")
+	}
+	//创建控制器facades
+	ctrlFacadeName, err := makeTplFile("app/facades/controller.go", app.CtrlFacadeTemplate, map[string]interface{}{"moduleName": name})
+	if err != nil {
+		fmt.Println(ctrlFacadeName + " create failed.")
+	} else {
+		fmt.Println(ctrlFacadeName + " created.")
+	}
+	//创建控制器的实现
+	ctrlConcreteName, err := makeTplFile("app/concretes/controller.go", app.CtrlConcreteTemplate, map[string]interface{}{"moduleName": name})
+	if err != nil {
+		fmt.Println(ctrlConcreteName + " create failed.")
+	} else {
+		fmt.Println(ctrlConcreteName + " created.")
+	}
+	//创建config文件
+	appConfigName, err := makeTplFile("app/config/app.go", app.AppConfigTemplate, map[string]interface{}{"moduleName": name})
+	if err != nil {
+		fmt.Println(appConfigName + " create failed.")
+	} else {
+		fmt.Println(appConfigName + " created.")
+	}
 	//创建logs目录
 	os.MkdirAll("logs", 0755)
 	//创建routes目录
-	webRouteName, err := makeTplFile("routes/web.go", app.WebRouteTemplate, map[string]interface{}{})
+	webRouteName, err := makeTplFile("routes/web.go", app.WebRouteTemplate, map[string]interface{}{"moduleName": name})
 	if err != nil {
 		fmt.Println(webRouteName + " create failed.")
 	} else {
@@ -317,14 +343,14 @@ func newApp(name string) string {
 	}else{
 		fmt.Println(viewLayoutName + " created.")
 	}
-	viewContentName, err := makeTplFile("views/layouts/content.html", app.ViewContentTemplate, map[string]interface{}{})
+	viewContentName, err := makeTplFile("views/home/index.html", app.ViewContentTemplate, map[string]interface{}{})
 	if err != nil{
 		fmt.Println(viewContentName + " create faild.")
 	}else{
 		fmt.Println(viewContentName + " created.")
 	}
 	//创建main.go文件
-	mainName, err := makeTplFile("main.go", app.MainTemplate, map[string]interface{}{})
+	mainName, err := makeTplFile("main.go", app.MainTemplate, map[string]interface{}{"moduleName": name})
 	if err != nil {
 		fmt.Println(mainName + " create failed.")
 	} else {

@@ -4,7 +4,8 @@ var WebRouteTemplate = `
 package routes
 
 import (
-	"ginrbac/bootstrap/app"
+	"github.com/owenzhou/ginrbac/app"
+	. "{{ .moduleName }}/app/facades"
 )
 
 func Web(a *app.App) {
