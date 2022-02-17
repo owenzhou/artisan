@@ -5,7 +5,7 @@ package main
 
 import (
 	"embed"
-	"{{ .moduleName }}/app/config"
+	"{{ .moduleName }}/config"
 	"github.com/owenzhou/ginrbac/app"
 	"{{ .moduleName }}/routes"
 )

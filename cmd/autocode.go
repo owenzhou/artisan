@@ -362,7 +362,7 @@ func newApp(name string) string {
 		fmt.Println("./" + ctrlConcreteName + " created.")
 	}
 	//创建config文件
-	appConfigName, err := makeTplFile("app/config/app.go", app.AppConfigTemplate, map[string]interface{}{"moduleName": name})
+	appConfigName, err := makeTplFile("config/app.go", app.AppConfigTemplate, map[string]interface{}{"moduleName": name})
 	if err != nil {
 		fmt.Println("./" + appConfigName + " create failed.")
 	} else {
