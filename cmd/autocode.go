@@ -1,18 +1,20 @@
 package cmd
 
 import (
-	"github.com/owenzhou/artisan/app"
-	"github.com/owenzhou/artisan/config"
-	"github.com/owenzhou/artisan/controller"
-	"github.com/owenzhou/artisan/event"
-	"github.com/owenzhou/artisan/listener"
-	"github.com/owenzhou/artisan/model"
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"text/template"
+
+	"github.com/owenzhou/artisan/app"
+	"github.com/owenzhou/artisan/config"
+	"github.com/owenzhou/artisan/controller"
+	"github.com/owenzhou/artisan/event"
+	"github.com/owenzhou/artisan/listener"
+	"github.com/owenzhou/artisan/model"
 )
 
 type tableField struct {
@@ -57,6 +59,14 @@ func makeTplFile(name string, tplStr string, data map[string]interface{}, funcs 
 	return name, tmpl.Execute(file, data)
 }
 
+//等待用户输入
+func waitEnter(name string) string {
+	input := bufio.NewScanner(os.Stdin)
+	fmt.Print(name + " file or directory already exist, continue?(Y/N):")
+	input.Scan()
+	return input.Text()
+}
+
 //创建控制器
 func makeController(name string, resource ...bool) string {
 	var tplStr string
@@ -65,11 +75,17 @@ func makeController(name string, resource ...bool) string {
 	} else {
 		tplStr = controller.Template
 	}
-	if config.Config == nil{
+	if config.Config == nil {
 		return "Make Controller error: config file is not exists."
 	}
 
 	filePath := config.Config.ControllerPath + "/" + name + ".go"
+	if _, err := os.Stat(filePath); err == nil {
+		s := waitEnter(filePath)
+		if s == "N" {
+			return "exit."
+		}
+	}
 
 	tmplArr := map[string]interface{}{
 		"packageName":    filepath.Base(config.Config.ControllerPath),
@@ -94,11 +110,17 @@ func makeModel(name string) (result string) {
 	}
 	defer rows.Close()
 
-	if config.Config == nil{
+	if config.Config == nil {
 		return "Make Model error: config file is not exists."
 	}
 
 	filePath := config.Config.ModelPath + "/" + name + ".go"
+	if _, err := os.Stat(filePath); err == nil {
+		s := waitEnter(filePath)
+		if s == "N" {
+			return "exit."
+		}
+	}
 
 	//是否导入time包
 	importTime := false
@@ -235,10 +257,16 @@ func makeModel(name string) (result string) {
 
 //创建事件
 func makeEvent(name string) string {
-	if config.Config == nil{
+	if config.Config == nil {
 		return "Make Event error: config file is not exists."
 	}
 	filePath := config.Config.EventPath + "/" + name + ".go"
+	if _, err := os.Stat(filePath); err == nil {
+		s := waitEnter(filePath)
+		if s == "N" {
+			return "exit."
+		}
+	}
 
 	tmplArr := map[string]interface{}{
 		"packageName": filepath.Base(config.Config.EventPath),
@@ -253,11 +281,17 @@ func makeEvent(name string) string {
 
 //创建监听器
 func makeListener(name string) string {
-	if config.Config == nil{
+	if config.Config == nil {
 		return "Make Listener error: config file is not exists."
 	}
 
 	filePath := config.Config.ListenerPath + "/" + name + ".go"
+	if _, err := os.Stat(filePath); err == nil {
+		s := waitEnter(filePath)
+		if s == "N" {
+			return "exit."
+		}
+	}
 
 	tmplArr := map[string]interface{}{
 		"packageName":  filepath.Base(config.Config.ListenerPath),
@@ -272,12 +306,21 @@ func makeListener(name string) string {
 
 //创建app
 func newApp(name string) string {
+	currentDir, _ := os.ReadDir(".")
+	if len(currentDir) > 0 {
+		input := bufio.NewScanner(os.Stdin)
+		fmt.Print("The current dir is not empty, continue?(Y/N):")
+		input.Scan()
+		if input.Text() == "N" {
+			return "exit."
+		}
+	}
 	//创建配置文件
 	configName, err := makeTplFile("config.yaml", app.ConfigTemplate, map[string]interface{}{})
 	if err != nil {
-		fmt.Println(configName + " create failed.")
+		fmt.Println("./" + configName + " create failed.")
 	} else {
-		fmt.Println(configName + " created.")
+		fmt.Println("./" + configName + " created.")
 	}
 
 	//创建go.mod文件
@@ -285,76 +328,76 @@ func newApp(name string) string {
 		"module": name,
 	})
 	if err != nil {
-		fmt.Println(gomodName + " create failed.")
+		fmt.Println("./" + gomodName + " create failed.")
 	} else {
-		fmt.Println(gomodName + " created.")
+		fmt.Println("./" + gomodName + " created.")
 	}
 	//创建一个默认的控制器
 	ctrlPath := "app/http/controllers/HomeController.go"
 	ctrlName, err := makeTplFile(ctrlPath, app.CtrlTemplate, map[string]interface{}{"packageName": "controllers"})
 	if err != nil {
-		fmt.Println(ctrlName + " create failed.")
+		fmt.Println("./" + ctrlName + " create failed.")
 	} else {
-		fmt.Println(ctrlName + " created.")
+		fmt.Println("./" + ctrlName + " created.")
 	}
 	//创建控制器服务
 	ctrlProviderName, err := makeTplFile("app/providers/ControllerServiceProvider.go", app.CtrlProviderTemplate, map[string]interface{}{"moduleName": name})
 	if err != nil {
-		fmt.Println(ctrlProviderName + " create failed.")
+		fmt.Println("./" + ctrlProviderName + " create failed.")
 	} else {
-		fmt.Println(ctrlProviderName + " created.")
+		fmt.Println("./" + ctrlProviderName + " created.")
 	}
 	//创建控制器facades
 	ctrlFacadeName, err := makeTplFile("app/facades/controller.go", app.CtrlFacadeTemplate, map[string]interface{}{"moduleName": name})
 	if err != nil {
-		fmt.Println(ctrlFacadeName + " create failed.")
+		fmt.Println("./" + ctrlFacadeName + " create failed.")
 	} else {
-		fmt.Println(ctrlFacadeName + " created.")
+		fmt.Println("./" + ctrlFacadeName + " created.")
 	}
 	//创建控制器的实现
 	ctrlConcreteName, err := makeTplFile("app/concretes/controller.go", app.CtrlConcreteTemplate, map[string]interface{}{"moduleName": name})
 	if err != nil {
-		fmt.Println(ctrlConcreteName + " create failed.")
+		fmt.Println("./" + ctrlConcreteName + " create failed.")
 	} else {
-		fmt.Println(ctrlConcreteName + " created.")
+		fmt.Println("./" + ctrlConcreteName + " created.")
 	}
 	//创建config文件
 	appConfigName, err := makeTplFile("app/config/app.go", app.AppConfigTemplate, map[string]interface{}{"moduleName": name})
 	if err != nil {
-		fmt.Println(appConfigName + " create failed.")
+		fmt.Println("./" + appConfigName + " create failed.")
 	} else {
-		fmt.Println(appConfigName + " created.")
+		fmt.Println("./" + appConfigName + " created.")
 	}
 	//创建logs目录
 	os.MkdirAll("logs", 0755)
 	//创建routes目录
 	webRouteName, err := makeTplFile("routes/web.go", app.WebRouteTemplate, map[string]interface{}{"moduleName": name})
 	if err != nil {
-		fmt.Println(webRouteName + " create failed.")
+		fmt.Println("./" + webRouteName + " create failed.")
 	} else {
-		fmt.Println(webRouteName + " created.")
+		fmt.Println("./" + webRouteName + " created.")
 	}
 	//创建utils目录
 	os.MkdirAll("utils", 0755)
 	//创建views目录
 	viewLayoutName, err := makeTplFile("views/layouts/layout.html", app.ViewLayoutTemplate, map[string]interface{}{})
-	if err != nil{
-		fmt.Println(viewLayoutName + " create faild.")
-	}else{
-		fmt.Println(viewLayoutName + " created.")
+	if err != nil {
+		fmt.Println("./" + viewLayoutName + " create faild.")
+	} else {
+		fmt.Println("./" + viewLayoutName + " created.")
 	}
 	viewContentName, err := makeTplFile("views/home/index.html", app.ViewContentTemplate, map[string]interface{}{})
-	if err != nil{
-		fmt.Println(viewContentName + " create faild.")
-	}else{
-		fmt.Println(viewContentName + " created.")
+	if err != nil {
+		fmt.Println("./" + viewContentName + " create faild.")
+	} else {
+		fmt.Println("./" + viewContentName + " created.")
 	}
 	//创建main.go文件
 	mainName, err := makeTplFile("main.go", app.MainTemplate, map[string]interface{}{"moduleName": name})
 	if err != nil {
-		fmt.Println(mainName + " create failed.")
+		fmt.Println("./" + mainName + " create failed.")
 	} else {
-		fmt.Println(mainName + " created.")
+		fmt.Println("./" + mainName + " created.")
 	}
-	return name + " app created."
+	return name + " application created."
 }

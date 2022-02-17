@@ -4,8 +4,9 @@ Copyright © 2021 artisan
 package cmd
 
 import (
-	"github.com/owenzhou/artisan/config"
 	"os"
+
+	"github.com/owenzhou/artisan/config"
 
 	"github.com/spf13/cobra"
 	"gorm.io/driver/mysql"
@@ -22,7 +23,7 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "github.com/owenzhou/artisan",
 	Short: "代码自动生成器",
-	Long:  `可自动生成：控制器，模型，事件，监听器等代码，方便开发`,
+	Long:  `可自动生成：项目，控制器，模型，事件，监听器等代码，方便开发`,
 }
 
 func Execute() {
