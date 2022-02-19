@@ -21,9 +21,10 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "github.com/owenzhou/artisan",
-	Short: "代码自动生成器",
-	Long:  `可自动生成：项目，控制器，模型，事件，监听器等代码，方便开发`,
+	Use:               "artisan",
+	Short:             "代码自动生成器",
+	Long:              `可自动生成：项目，控制器，模型，事件，监听器等代码，方便开发`,
+	CompletionOptions: cobra.CompletionOptions{DisableDefaultCmd: true},
 }
 
 func Execute() {
