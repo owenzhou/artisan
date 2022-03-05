@@ -150,10 +150,28 @@ func makeModel(name string) (result string) {
 		}
 
 		//处理模型 type 字段
-		if strings.Contains(table.Type, "tinyint") {
+		if strings.Contains(table.Type, "tinyint(1)") {
 			tableFields["type"] = "bool"
+		} else if strings.Contains(table.Type, "tinyint") {
+			tableFields["type"] = "int8"
+			if strings.Contains(table.Type, "unsigned") {
+				tableFields["type"] = "uint8"
+			}
+		} else if strings.Contains(table.Type, "mediumint") || strings.Contains(table.Type, "smallint") {
+			tableFields["type"] = "int16"
+			if strings.Contains(table.Type, "unsigned") {
+				tableFields["type"] = "uint16"
+			}
+		} else if strings.Contains(table.Type, "bigint") {
+			tableFields["type"] = "int64"
+			if strings.Contains(table.Type, "unsigned") {
+				tableFields["type"] = "uint64"
+			}
 		} else if strings.Contains(table.Type, "int") {
 			tableFields["type"] = "int"
+			if strings.Contains(table.Type, "unsigned") {
+				tableFields["type"] = "uint"
+			}
 		} else if strings.Contains(table.Type, "varchar") || strings.Contains(table.Type, "char") {
 			tableFields["type"] = "string"
 		} else if strings.Contains(table.Type, "timestamp") ||
@@ -178,21 +196,37 @@ func makeModel(name string) (result string) {
 		if table.Key == "PRI" {
 			gormTagStr += "primaryKey;"
 		}
+		if table.Key == "UNI" {
+			gormTagStr += "unique;"
+		}
 		if table.Default != "" {
-			gormTagStr += "default:" + table.Default + ";"
+			defaultValue := table.Default
 			importSql = true
 			if tableFields["type"] == "string" {
 				tableFields["type"] = "sql.NullString"
 			}
 			if tableFields["type"] == "bool" {
+				if table.Default == "0" {
+					defaultValue = "false"
+				}else{
+					defaultValue = "true"
+				}
+				
 				tableFields["type"] = "sql.NullBool"
 			}
-			if tableFields["type"] == "int" {
+			if tableFields["type"] == "int16" || tableFields["type"] == "uint16" {
+				tableFields["type"] = "sql.NullInt16"
+			}
+			if tableFields["type"] == "int" || tableFields["type"] == "uint" {
+				tableFields["type"] = "sql.NullInt32"
+			}
+			if tableFields["type"] == "int64" || tableFields["type"] == "uint64" {
 				tableFields["type"] = "sql.NullInt64"
 			}
 			if tableFields["type"] == "float64" {
 				tableFields["type"] = "sql.NullFloat64"
 			}
+			gormTagStr += "default:" + defaultValue + ";"
 		}
 		if table.Extra == "auto_increment" {
 			gormTagStr += "autoIncrement;"
@@ -210,7 +244,7 @@ func makeModel(name string) (result string) {
 				reg := regexp.MustCompile(`\d+`)
 				cd := reg.FindString(table.Type)
 				if cd != "" {
-					bindingStr += ",min=2,max=" + cd
+					bindingStr += ",min=0,max=" + cd
 				}
 			}
 		}
@@ -221,22 +255,22 @@ func makeModel(name string) (result string) {
 
 		//最后将tag合并
 		if gormTagStr != "" {
-			gormTagStr = `gorm:"` + gormTagStr + `"`
+			gormTagStr = ` gorm:"` + gormTagStr + `"`
 		}
 
 		if bindingStr != "" {
-			bindingStr = `binding:"` + bindingStr + `"`
+			bindingStr = ` binding:"` + bindingStr + `"`
 		}
 
 		if formStr != "" {
-			formStr = `form:"` + formStr + `"`
+			formStr = ` form:"` + formStr + `"`
 		}
 
 		if labelStr != "" {
-			labelStr = `label:"` + labelStr + `"`
+			labelStr = ` label:"` + labelStr + `"`
 		}
 
-		tableFields["tag"] = fmt.Sprintf("`json:\"%s\" %s %s %s %s`", table.Field, gormTagStr, bindingStr, formStr, labelStr)
+		tableFields["tag"] = fmt.Sprintf("`json:\"%s\"%s%s%s%s`", table.Field, gormTagStr, bindingStr, formStr, labelStr)
 
 		modelFields = append(modelFields, tableFields)
 	}
