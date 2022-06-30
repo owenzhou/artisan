@@ -88,8 +88,8 @@ func makeController(name string, resource ...bool) string {
 	}
 
 	tmplArr := map[string]interface{}{
-		"packageName":    filepath.Base(config.Config.ControllerPath),
-		"controllerName": name,
+		"packageName":    filepath.Base(filepath.Dir(filePath)),
+		"controllerName": filepath.Base(name),
 	}
 	createdName, err := makeTplFile(filePath, tplStr, tmplArr)
 	if err != nil {
