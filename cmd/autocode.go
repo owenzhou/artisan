@@ -303,8 +303,8 @@ func makeEvent(name string) string {
 	}
 
 	tmplArr := map[string]interface{}{
-		"packageName": filepath.Base(config.Config.EventPath),
-		"eventName":   name,
+		"packageName": filepath.Base(filepath.Dir(filePath)),
+		"eventName":   filepath.Base(name),
 	}
 	createdName, err := makeTplFile(filePath, event.Template, tmplArr)
 	if err != nil {
@@ -328,8 +328,8 @@ func makeListener(name string) string {
 	}
 
 	tmplArr := map[string]interface{}{
-		"packageName":  filepath.Base(config.Config.ListenerPath),
-		"listenerName": name,
+		"packageName":  filepath.Base(filepath.Dir(filePath)),
+		"listenerName": filepath.Base(name),
 	}
 	createdName, err := makeTplFile(filePath, listener.Template, tmplArr)
 	if err != nil {
