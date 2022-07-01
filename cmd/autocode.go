@@ -103,7 +103,7 @@ func makeModel(name string) (result string) {
 
 	var table tableField
 	var modelFields = make([]map[string]string, 0)
-	rows, err := db.Model(&tableField{}).Raw("show full columns from " + name).Rows()
+	rows, err := db.Model(&tableField{}).Raw("show full columns from " + filepath.Base(name)).Rows()
 	if err != nil {
 		fmt.Println(err)
 		return
