@@ -276,10 +276,10 @@ func makeModel(name string) (result string) {
 	}
 
 	tmplArr := map[string]interface{}{
-		"packageName": filepath.Base(config.Config.ModelPath),
+		"packageName": filepath.Base(filepath.Dir(filePath)),
 		"importTime":  importTime,
 		"importSql":   importSql,
-		"modelName":   strings.ReplaceAll(strings.Title(strings.ReplaceAll(name, "_", " ")), " ", ""),
+		"modelName":   strings.ReplaceAll(strings.Title(strings.ReplaceAll(filepath.Base(name), "_", " ")), " ", ""),
 		"fields":      modelFields,
 	}
 	createdName, err := makeTplFile(filePath, model.Template, tmplArr, template.FuncMap{"ucfirst": strings.Title})
