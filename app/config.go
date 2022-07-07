@@ -10,6 +10,8 @@ listenerPath: app/listeners
 #---------------------------
 debug: true
 
+timezone: "Asia/Shanghai"
+
 appName: "My App"
 
 template:
@@ -50,7 +52,7 @@ mysql:
   host: 127.0.0.1
   port: 3306
   username: root
-  password: admin123
+  password: 
   dbname: ginrbac
   charset: utf8mb4
 logger:
