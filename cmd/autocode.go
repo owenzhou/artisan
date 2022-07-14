@@ -246,7 +246,7 @@ func makeModel(name string) (result string) {
 
 				reg := regexp.MustCompile(`\d+`)
 				cd := reg.FindString(table.Type)
-				if cd != "" {
+				if cd != "" && strings.Contains(tableFields["type"], "string") {
 					bindingStr += ",min=0,max=" + cd
 				}
 			}
