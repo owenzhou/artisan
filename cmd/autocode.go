@@ -150,9 +150,7 @@ func makeModel(name string) (result string) {
 		}
 
 		//处理模型 type 字段
-		if strings.Contains(table.Type, "tinyint(1)") {
-			tableFields["type"] = "bool"
-		} else if strings.Contains(table.Type, "tinyint") {
+		if strings.Contains(table.Type, "tinyint") {
 			tableFields["type"] = "int8"
 			if strings.Contains(table.Type, "unsigned") {
 				tableFields["type"] = "uint8"
@@ -195,7 +193,10 @@ func makeModel(name string) (result string) {
 		//当字段默认值不为空时，再次处理Type
 		if table.Default != "" {
 			defaultValue := table.Default
-			//importSql = true		不使用sql.Null...类型，gin shouldBind不支持
+			tableFields["type"] = "*" + tableFields["type"]
+
+			/*不使用sql.Null...类型，gin shouldBind不支持
+			importSql = true		
 			if tableFields["type"] == "bool" {
 				if table.Default == "0" {
 					defaultValue = "false"
@@ -205,8 +206,7 @@ func makeModel(name string) (result string) {
 				
 				tableFields["type"] = "*bool"
 			}
-			tableFields["type"] = "*" + tableFields["type"]
-			/*
+			
 			if tableFields["type"] == "int16" || tableFields["type"] == "uint16" {
 				tableFields["type"] = "sql.NullInt16"
 			}
