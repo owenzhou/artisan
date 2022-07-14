@@ -192,19 +192,10 @@ func makeModel(name string) (result string) {
 			tableFields["type"] = table.Type
 		}
 
-		//处理模型 tag 字段
-		if table.Key == "PRI" {
-			gormTagStr += "primaryKey;"
-		}
-		if table.Key == "UNI" {
-			gormTagStr += "unique;"
-		}
+		//当字段默认值不为空时，再次处理Type
 		if table.Default != "" {
 			defaultValue := table.Default
-			importSql = true
-			if tableFields["type"] == "string" {
-				tableFields["type"] = "sql.NullString"
-			}
+			//importSql = true		不使用sql.Null...类型，gin shouldBind不支持
 			if tableFields["type"] == "bool" {
 				if table.Default == "0" {
 					defaultValue = "false"
@@ -212,8 +203,10 @@ func makeModel(name string) (result string) {
 					defaultValue = "true"
 				}
 				
-				tableFields["type"] = "sql.NullBool"
+				tableFields["type"] = "*bool"
 			}
+			tableFields["type"] = "*" + tableFields["type"]
+			/*
 			if tableFields["type"] == "int16" || tableFields["type"] == "uint16" {
 				tableFields["type"] = "sql.NullInt16"
 			}
@@ -226,8 +219,18 @@ func makeModel(name string) (result string) {
 			if tableFields["type"] == "float64" {
 				tableFields["type"] = "sql.NullFloat64"
 			}
+			*/
 			gormTagStr += "default:" + defaultValue + ";"
 		}
+
+		//处理模型 tag 字段
+		if table.Key == "PRI" {
+			gormTagStr += "primaryKey;"
+		}
+		if table.Key == "UNI" {
+			gormTagStr += "unique;"
+		}
+		
 		if table.Extra == "auto_increment" {
 			gormTagStr += "autoIncrement;"
 		}
