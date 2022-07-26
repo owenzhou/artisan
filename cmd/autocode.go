@@ -252,7 +252,7 @@ func makeModel(name string) (result string) {
 					bindingStr += ",min=0,max=" + cd
 				}
 			}
-		}else if strings.Contains(tableField["type"], "string"){	//字段为空不插入问题，加入指针
+		}else if strings.Contains(tableFields["type"], "string"){	//字段为空不更新问题，加入指针
 			tableFields["type"] = "*string"
 		}
 
