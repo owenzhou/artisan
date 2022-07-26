@@ -235,11 +235,13 @@ func makeModel(name string) (result string) {
 			gormTagStr += "autoIncrement;"
 		}
 
+		//字段默认加上form,label标记
+		formStr += table.Field
+		labelStr += table.Comment
+
 		//字段不为空，则设置tag的form, label标签
 		if table.Null == "NO" {
 			gormTagStr += "not null;"
-			formStr += table.Field
-			labelStr += table.Comment
 			//创建binding，主键不用创建binding
 			if table.Key != "PRI" {
 				bindingStr += "required"
