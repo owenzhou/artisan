@@ -235,11 +235,11 @@ func makeModel(name string) (result string) {
 			gormTagStr += "autoIncrement;"
 		}
 
-		//字段默认加上form,label标记
+		//字段默认加上form,label标签
 		formStr += table.Field
 		labelStr += table.Comment
 
-		//字段不为空，则设置tag的form, label标签
+		//字段不为空，则设置binding标签
 		if table.Null == "NO" {
 			gormTagStr += "not null;"
 			//创建binding，主键不用创建binding
@@ -252,6 +252,8 @@ func makeModel(name string) (result string) {
 					bindingStr += ",min=0,max=" + cd
 				}
 			}
+		}else if strings.Contains(tableField["type"], "string"){	//字段为空不插入问题，加入指针
+			tableFields["type"] = "*string"
 		}
 
 		if table.Comment != "" {
