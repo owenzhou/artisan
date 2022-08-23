@@ -6,6 +6,6 @@ module {{ .module }}
 go 1.18
 
 require (
-	github.com/owenzhou/ginrbac v0.1.1
+	github.com/owenzhou/ginrbac v0.1.2
 )
 `
