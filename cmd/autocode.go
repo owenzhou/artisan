@@ -172,6 +172,11 @@ func makeModel(name string) (result string) {
 			}
 		} else if strings.Contains(table.Type, "varchar") || strings.Contains(table.Type, "char") {
 			tableFields["type"] = "string"
+			reg := regexp.MustCompile(`\d+`)
+			cd := reg.FindString(table.Type)
+			if cd != "" {
+				bindingStr += "min=0,max=" + cd + ","
+			}
 		} else if strings.Contains(table.Type, "timestamp") ||
 			strings.Contains(table.Type, "datetime") ||
 			strings.Contains(table.Type, "date") ||
@@ -245,12 +250,6 @@ func makeModel(name string) (result string) {
 			//创建binding，主键不用创建binding
 			if table.Key != "PRI" {
 				bindingStr += "required"
-
-				reg := regexp.MustCompile(`\d+`)
-				cd := reg.FindString(table.Type)
-				if cd != "" && strings.Contains(tableFields["type"], "string") {
-					bindingStr += ",min=0,max=" + cd
-				}
 			}
 		}else if strings.Contains(tableFields["type"], "string"){	//字段为空不更新问题，加入指针
 			tableFields["type"] = "*string"
