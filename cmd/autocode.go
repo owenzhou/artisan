@@ -265,7 +265,7 @@ func makeModel(name string) (result string) {
 		}
 
 		if bindingStr != "" {
-			bindingStr = ` binding:"` + bindingStr + `"`
+			bindingStr = ` binding:"` + strings.Trim(bindingStr, ",") + `"`
 		}
 
 		if formStr != "" {
