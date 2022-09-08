@@ -175,7 +175,7 @@ func makeModel(name string) (result string) {
 			reg := regexp.MustCompile(`\d+`)
 			cd := reg.FindString(table.Type)
 			if cd != "" {
-				bindingStr += "min=0,max=" + cd + ","
+				bindingStr += "min=0,max=" + cd
 			}
 		} else if strings.Contains(table.Type, "timestamp") ||
 			strings.Contains(table.Type, "datetime") ||
@@ -249,7 +249,7 @@ func makeModel(name string) (result string) {
 			gormTagStr += "not null;"
 			//创建binding，主键不用创建binding
 			if table.Key != "PRI" {
-				bindingStr += "required"
+				bindingStr += ",required"
 			}
 		}else if strings.Contains(tableFields["type"], "string"){	//字段为空不更新问题，加入指针
 			tableFields["type"] = "*string"
