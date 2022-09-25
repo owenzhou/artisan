@@ -155,11 +155,18 @@ func makeModel(name string) (result string) {
 			if strings.Contains(table.Type, "unsigned") {
 				tableFields["type"] = "uint8"
 			}
-		} else if strings.Contains(table.Type, "mediumint") || strings.Contains(table.Type, "smallint") {
+		} else if strings.Contains(table.Type, "smallint") {
 			tableFields["type"] = "int16"
 			if strings.Contains(table.Type, "unsigned") {
 				tableFields["type"] = "uint16"
 			}
+		} else if strings.Contains(table.Type, "mediumint") {	//不常见类型添加gorm type标签
+			tableFields["type"] = "int32"
+			if strings.Contains(table.Type, "unsigned") {
+				tableFields["type"] = "uint32"
+			}
+			tps := strings.Split(table.Type, " ")
+			gormTagStr += "type:" + tps[0] + ";"
 		} else if strings.Contains(table.Type, "bigint") {
 			tableFields["type"] = "int64"
 			if strings.Contains(table.Type, "unsigned") {
@@ -191,6 +198,8 @@ func makeModel(name string) (result string) {
 			strings.Contains(table.Type, "double") ||
 			strings.Contains(table.Type, "decimal") {
 			tableFields["type"] = "float64"
+			tps := strings.Split(table.Type, " ")
+			gormTagStr += "type:" + tps[0] + ";"
 		} else {
 			tableFields["type"] = table.Type
 		}
