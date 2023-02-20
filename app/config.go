@@ -41,13 +41,15 @@ auth:
     adminusers:
       driver: database
       table: users
-
+session:
+  secret-key: "VMYHO4Z233HSIQTZFIJHDOU6O7XVPICDF6X2EY474MIB7UDE5NYA"
+  lifetime: 7200
 captcha:
   width: 96
   height: 38
   num: 5
   secret-key: mycaptcha
-  expired: 60
+  lifetime: 60
 mysql:
   host: 127.0.0.1
   port: 3306
@@ -55,6 +57,10 @@ mysql:
   password: 
   dbname: ginrbac
   charset: utf8mb4
+  maxOpenConns: 25
+  maxIdleConns: 25
+  #以分为单位
+  connMaxLifeTime: 5
 logger:
   link-name: lastest-log
   encoding: json
@@ -65,7 +71,7 @@ logger:
   rotation-time: 24
 jwt:
   sign-key: myjwt
-  expires-time: 3600
+  lifetime: 3600
 redis:
   db: 0
   addr: 127.0.0.1:6379
