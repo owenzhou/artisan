@@ -9,12 +9,12 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/owenzhou/artisan/app"
 	"github.com/owenzhou/artisan/config"
-	"github.com/owenzhou/artisan/controller"
-	"github.com/owenzhou/artisan/event"
-	"github.com/owenzhou/artisan/listener"
-	"github.com/owenzhou/artisan/model"
+	"github.com/owenzhou/artisan/template/app"
+	"github.com/owenzhou/artisan/template/controller"
+	"github.com/owenzhou/artisan/template/event"
+	"github.com/owenzhou/artisan/template/listener"
+	"github.com/owenzhou/artisan/template/model"
 )
 
 type tableField struct {
@@ -29,7 +29,7 @@ type tableField struct {
 	Comment    string `json:"Comment"`
 }
 
-//创建文件夹及文件
+// 创建文件夹及文件
 func makeFile(filename string) *os.File {
 	//文件夹不存在则创建文件夹
 	dir := filepath.Dir(filename)
@@ -44,7 +44,7 @@ func makeFile(filename string) *os.File {
 	return f
 }
 
-//创建模板文件
+// 创建模板文件
 func makeTplFile(name string, tplStr string, data map[string]interface{}, funcs ...template.FuncMap) (string, error) {
 	var f template.FuncMap
 	if len(funcs) > 0 {
@@ -59,7 +59,7 @@ func makeTplFile(name string, tplStr string, data map[string]interface{}, funcs 
 	return name, tmpl.Execute(file, data)
 }
 
-//等待用户输入
+// 等待用户输入
 func waitEnter(name string) string {
 	input := bufio.NewScanner(os.Stdin)
 	fmt.Print(name + " file or directory already exist, continue?(Y/N):")
@@ -67,7 +67,7 @@ func waitEnter(name string) string {
 	return input.Text()
 }
 
-//创建控制器
+// 创建控制器
 func makeController(name string, resource ...bool) string {
 	var tplStr string
 	if len(resource) > 0 && resource[0] {
@@ -98,7 +98,7 @@ func makeController(name string, resource ...bool) string {
 	return createdName + " controller created."
 }
 
-//创建模型
+// 创建模型
 func makeModel(name string) (result string) {
 
 	var table tableField
@@ -160,7 +160,7 @@ func makeModel(name string) (result string) {
 			if strings.Contains(table.Type, "unsigned") {
 				tableFields["type"] = "uint16"
 			}
-		} else if strings.Contains(table.Type, "mediumint") {	//不常见类型添加gorm type标签
+		} else if strings.Contains(table.Type, "mediumint") { //不常见类型添加gorm type标签
 			tableFields["type"] = "int32"
 			if strings.Contains(table.Type, "unsigned") {
 				tableFields["type"] = "uint32"
@@ -210,17 +210,17 @@ func makeModel(name string) (result string) {
 			tableFields["type"] = "*" + tableFields["type"]
 
 			/*不使用sql.Null...类型，gin shouldBind不支持
-			importSql = true		
+			importSql = true
 			if tableFields["type"] == "bool" {
 				if table.Default == "0" {
 					defaultValue = "false"
 				}else{
 					defaultValue = "true"
 				}
-				
+
 				tableFields["type"] = "*bool"
 			}
-			
+
 			if tableFields["type"] == "int16" || tableFields["type"] == "uint16" {
 				tableFields["type"] = "sql.NullInt16"
 			}
@@ -244,7 +244,7 @@ func makeModel(name string) (result string) {
 		if table.Key == "UNI" {
 			gormTagStr += "unique;"
 		}
-		
+
 		if table.Extra == "auto_increment" {
 			gormTagStr += "autoIncrement;"
 		}
@@ -260,7 +260,7 @@ func makeModel(name string) (result string) {
 			if table.Key != "PRI" {
 				bindingStr += ",required"
 			}
-		}else if strings.Contains(tableFields["type"], "string"){	//字段为空不更新问题，加入指针
+		} else if strings.Contains(tableFields["type"], "string") { //字段为空不更新问题，加入指针
 			tableFields["type"] = "*string"
 		}
 
@@ -304,7 +304,7 @@ func makeModel(name string) (result string) {
 	return createdName + " model created."
 }
 
-//创建事件
+// 创建事件
 func makeEvent(name string) string {
 	if config.Config == nil {
 		return "Make Event error: config file is not exists."
@@ -328,7 +328,7 @@ func makeEvent(name string) string {
 	return createdName + " event created."
 }
 
-//创建监听器
+// 创建监听器
 func makeListener(name string) string {
 	if config.Config == nil {
 		return "Make Listener error: config file is not exists."
@@ -353,7 +353,7 @@ func makeListener(name string) string {
 	return createdName + " listener created."
 }
 
-//创建app
+// 创建app
 func newApp(name string) string {
 	currentDir, _ := os.ReadDir(".")
 	if len(currentDir) > 0 {
