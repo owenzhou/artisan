@@ -140,6 +140,10 @@ func makeModel(name string) (result string) {
 
 		//默认添加clumn标识
 		gormTagStr += "column:" + table.Field + ";"
+		//默认加上type标识，用于gorm的automigrate生成表的字段
+		tps := strings.Split(table.Type, " ")
+		gormTagStr += "type:" + tps[0] + ";"
+
 		//处理模型的 field 字段
 		if table.Field == "id" {
 			tableFields["field"] = "ID"
@@ -165,7 +169,6 @@ func makeModel(name string) (result string) {
 			if strings.Contains(table.Type, "unsigned") {
 				tableFields["type"] = "uint32"
 			}
-			tps := strings.Split(table.Type, " ")
 			gormTagStr += "type:" + tps[0] + ";"
 		} else if strings.Contains(table.Type, "bigint") {
 			tableFields["type"] = "int64"
@@ -198,43 +201,27 @@ func makeModel(name string) (result string) {
 			strings.Contains(table.Type, "double") ||
 			strings.Contains(table.Type, "decimal") {
 			tableFields["type"] = "float64"
-			tps := strings.Split(table.Type, " ")
 			gormTagStr += "type:" + tps[0] + ";"
 		} else {
 			tableFields["type"] = table.Type
 		}
 
-		//当字段默认值不为空时，再次处理Type
+		//如果字段可以为空，则使用指针类型
+		if table.Null == "YES" {
+			tableFields["type"] = "*"+ tableFields["type"]
+
+		//字段不能为空，则设置binding标签
+		} else {
+			gormTagStr += "not null;"
+			//创建binding，主键不用创建binding
+			if table.Key != "PRI" {
+				bindingStr += ",required"
+			}
+		}
+
+		//当字段默认值不为空时，加入默认值
 		if table.Default != "" {
-			defaultValue := table.Default
-			tableFields["type"] = "*" + tableFields["type"]
-
-			/*不使用sql.Null...类型，gin shouldBind不支持
-			importSql = true
-			if tableFields["type"] == "bool" {
-				if table.Default == "0" {
-					defaultValue = "false"
-				}else{
-					defaultValue = "true"
-				}
-
-				tableFields["type"] = "*bool"
-			}
-
-			if tableFields["type"] == "int16" || tableFields["type"] == "uint16" {
-				tableFields["type"] = "sql.NullInt16"
-			}
-			if tableFields["type"] == "int" || tableFields["type"] == "uint" {
-				tableFields["type"] = "sql.NullInt32"
-			}
-			if tableFields["type"] == "int64" || tableFields["type"] == "uint64" {
-				tableFields["type"] = "sql.NullInt64"
-			}
-			if tableFields["type"] == "float64" {
-				tableFields["type"] = "sql.NullFloat64"
-			}
-			*/
-			gormTagStr += "default:" + defaultValue + ";"
+			gormTagStr += "default:" + table.Default + ";"
 		}
 
 		//处理模型 tag 字段
@@ -242,7 +229,10 @@ func makeModel(name string) (result string) {
 			gormTagStr += "primaryKey;"
 		}
 		if table.Key == "UNI" {
-			gormTagStr += "unique;"
+			gormTagStr += "uniqueIndex:uni_index_"+ table.Field +";"
+		}
+		if table.Key == "MUL" {
+			gormTagStr += "index:index_"+ table.Field +";"
 		}
 
 		if table.Extra == "auto_increment" {
@@ -252,17 +242,6 @@ func makeModel(name string) (result string) {
 		//字段默认加上form,label标签
 		formStr += table.Field
 		labelStr += table.Comment
-
-		//字段不为空，则设置binding标签
-		if table.Null == "NO" {
-			gormTagStr += "not null;"
-			//创建binding，主键不用创建binding
-			if table.Key != "PRI" {
-				bindingStr += ",required"
-			}
-		} else if strings.Contains(tableFields["type"], "string") { //字段为空不更新问题，加入指针
-			tableFields["type"] = "*string"
-		}
 
 		if table.Comment != "" {
 			gormTagStr += "comment:'" + table.Comment + "';"
