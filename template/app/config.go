@@ -62,7 +62,7 @@ mysql:
   #以分为单位
   connMaxLifeTime: 5
 logger:
-  link-name: lastest-log
+  link-name: latest-log
   encoding: json
   output-dir: logs
   #文件最大保存时间，小时为单位

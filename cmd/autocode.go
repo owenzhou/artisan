@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strings"
 	"text/template"
+	"database/sql"
 
 	"github.com/owenzhou/artisan/config"
 	"github.com/owenzhou/artisan/template/app"
@@ -23,7 +24,7 @@ type tableField struct {
 	Collation  string `json:"Collation"`
 	Null       string `json:"Null"`
 	Key        string `json:"Key"`
-	Default    string `json:"Default"`
+	Default    sql.NullString `json:"Default"`
 	Extra      string `json:"Extra"`
 	Privileges string `json:"Privileges"`
 	Comment    string `json:"Comment"`
@@ -82,7 +83,7 @@ func makeController(name string, resource ...bool) string {
 	filePath := config.Config.ControllerPath + "/" + name + ".go"
 	if _, err := os.Stat(filePath); err == nil {
 		s := waitEnter(filePath)
-		if s == "N" {
+		if s == "N" || s == "n" {
 			return "exit."
 		}
 	}
@@ -117,7 +118,7 @@ func makeModel(name string) (result string) {
 	filePath := config.Config.ModelPath + "/" + name + ".go"
 	if _, err := os.Stat(filePath); err == nil {
 		s := waitEnter(filePath)
-		if s == "N" {
+		if s == "N" || s == "n" {
 			return "exit."
 		}
 	}
@@ -141,8 +142,11 @@ func makeModel(name string) (result string) {
 		//默认添加clumn标识
 		gormTagStr += "column:" + table.Field + ";"
 		//默认加上type标识，用于gorm的automigrate生成表的字段
-		tps := strings.Split(table.Type, " ")
-		gormTagStr += "type:" + tps[0] + ";"
+		if table.Extra == "auto_increment" {
+			gormTagStr += "type:" + table.Type + " auto_increment;"
+		} else {
+			gormTagStr += "type:" + table.Type + ";"
+		}
 
 		//处理模型的 field 字段
 		if table.Field == "id" {
@@ -169,7 +173,6 @@ func makeModel(name string) (result string) {
 			if strings.Contains(table.Type, "unsigned") {
 				tableFields["type"] = "uint32"
 			}
-			gormTagStr += "type:" + tps[0] + ";"
 		} else if strings.Contains(table.Type, "bigint") {
 			tableFields["type"] = "int64"
 			if strings.Contains(table.Type, "unsigned") {
@@ -196,12 +199,10 @@ func makeModel(name string) (result string) {
 			tableFields["type"] = "time.Time"
 		} else if strings.Contains(table.Type, "text") {
 			tableFields["type"] = "string"
-			gormTagStr += "type:longText;"
 		} else if strings.Contains(table.Type, "float") ||
 			strings.Contains(table.Type, "double") ||
 			strings.Contains(table.Type, "decimal") {
 			tableFields["type"] = "float64"
-			gormTagStr += "type:" + tps[0] + ";"
 		} else {
 			tableFields["type"] = table.Type
 		}
@@ -217,11 +218,21 @@ func makeModel(name string) (result string) {
 			if table.Key != "PRI" {
 				bindingStr += ",required"
 			}
+
+			//如果默认值为：0，0.0，0.00等，则改为指针类型
+			reg := regexp.MustCompile(`^0(\.0+)*$`)
+			if table.Default.Valid && reg.MatchString(table.Default.String) {
+				tableFields["type"] = "*"+ tableFields["type"]
+			}
 		}
 
-		//当字段默认值不为空时，加入默认值
-		if table.Default != "" {
-			gormTagStr += "default:" + table.Default + ";"
+		//处理字段默认值
+		if table.Default.Valid {
+			if table.Default.String == "" {
+				gormTagStr += "default:'';"
+			}else{
+				gormTagStr += "default:"+ table.Default.String +";"
+			}
 		}
 
 		//处理模型 tag 字段
@@ -244,7 +255,7 @@ func makeModel(name string) (result string) {
 		labelStr += table.Comment
 
 		if table.Comment != "" {
-			gormTagStr += "comment:'" + table.Comment + "';"
+			gormTagStr += "comment:" + table.Comment + ";"
 		}
 
 		//最后将tag合并
@@ -291,7 +302,7 @@ func makeEvent(name string) string {
 	filePath := config.Config.EventPath + "/" + name + ".go"
 	if _, err := os.Stat(filePath); err == nil {
 		s := waitEnter(filePath)
-		if s == "N" {
+		if s == "N" || s == "n" {
 			return "exit."
 		}
 	}
@@ -316,7 +327,7 @@ func makeListener(name string) string {
 	filePath := config.Config.ListenerPath + "/" + name + ".go"
 	if _, err := os.Stat(filePath); err == nil {
 		s := waitEnter(filePath)
-		if s == "N" {
+		if s == "N" || s == "n" {
 			return "exit."
 		}
 	}

@@ -12,13 +12,49 @@ type {{.controllerName}} struct {
 	*app.Controller
 }
 
+//列表
 func (ctrl *{{.controllerName}}) Index(c *app.Context){
 	Log.WithFields(Fields{
-		"title": "hello world",
+		"title": "visit index",
 	}).Info("visit home index")
 
 	c.JSON(200, app.H{
-		"title":  "hello world",
+		"title":  "visit index",
+	})
+}
+
+//添加
+func (ctrl *{{.controllerName}}) Add(c *app.Context) {
+	c.JSON(200, app.H{
+		"title":  "visit add",
+	})
+}
+
+//添加保存
+func (ctrl *{{.controllerName}}) Save(c *app.Context) {
+	c.JSON(200, app.H{
+		"title":  "visit save",
+	})
+}
+
+//修改
+func (ctrl *{{.controllerName}}) Edit(c *app.Context) {
+	c.JSON(200, app.H{
+		"title":  "visit edit",
+	})
+}
+
+//修改保存
+func (ctrl *{{.controllerName}}) Update(c *app.Context) {
+	c.JSON(200, app.H{
+		"title":  "visit update",
+	})
+}
+
+//删除
+func (ctrl *{{.controllerName}}) Delete(c *app.Context) {
+	c.JSON(200, app.H{
+		"title":  "visit delete",
 	})
 }
 `
