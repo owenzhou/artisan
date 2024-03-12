@@ -142,11 +142,19 @@ func makeModel(name string) (result string) {
 		//默认添加clumn标识
 		gormTagStr += "column:" + table.Field + ";"
 		//默认加上type标识，用于gorm的automigrate生成表的字段
-		if table.Extra == "auto_increment" {
-			gormTagStr += "type:" + table.Type + " auto_increment;"
-		} else {
-			gormTagStr += "type:" + table.Type + ";"
+		gormTypeTagStr := "type:"+ table.Type +""
+		if table.Null == "YES" {
+			gormTypeTagStr += " NULL"
 		}
+		if table.Null == "NO" {
+			gormTypeTagStr += " NOT NULL"
+		}
+
+		if table.Extra != "" {
+			gormTypeTagStr += " "+ table.Extra
+		}
+
+		gormTagStr += gormTypeTagStr + ";"
 
 		//处理模型的 field 字段
 		if table.Field == "id" {
