@@ -168,7 +168,7 @@ func makeModel(name string) (result string) {
 			if strings.Contains(table.Type, "unsigned") {
 				tableFields["type"] = "uint16"
 			}
-		} else if strings.Contains(table.Type, "mediumint") { //不常见类型添加gorm type标签
+		} else if strings.Contains(table.Type, "mediumint") {
 			tableFields["type"] = "int32"
 			if strings.Contains(table.Type, "unsigned") {
 				tableFields["type"] = "uint32"
@@ -207,22 +207,18 @@ func makeModel(name string) (result string) {
 			tableFields["type"] = table.Type
 		}
 
-		//如果字段可以为空，则使用指针类型
-		if table.Null == "YES" {
-			tableFields["type"] = "*"+ tableFields["type"]
-
-		//字段不能为空，则设置binding标签
-		} else {
+		//如果字段不能为空，则设置binding标签
+		if table.Null == "NO" {
 			gormTagStr += "not null;"
-			//创建binding，主键不用创建binding
+			//创建binding，主键不用创建binding，主键也不用指针
 			if table.Key != "PRI" {
 				bindingStr += ",required"
-			}
 
-			//如果默认值为：0，0.0，0.00等，则改为指针类型
-			reg := regexp.MustCompile(`^0(\.0+)*$`)
-			if table.Default.Valid && reg.MatchString(table.Default.String) {
-				tableFields["type"] = "*"+ tableFields["type"]
+				//如果默认值为：0，0.0，0.00等，则改为指针类型
+				reg := regexp.MustCompile(`^0(\.0+)*$`)
+				if table.Default.Valid && reg.MatchString(table.Default.String) {
+					tableFields["type"] = "*"+ tableFields["type"]
+				}
 			}
 		}
 
