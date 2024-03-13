@@ -215,10 +215,15 @@ func makeModel(name string) (result string) {
 			tableFields["type"] = table.Type
 		}
 
+		//如果字段可以为空，则使用指针类型，时间类型不使用指针
+		if table.Null == "YES" && tableFields["type"] != "time.Time" {
+			tableFields["type"] = "*"+ tableFields["type"]
+		}
+
 		//如果字段不能为空，则设置binding标签
 		if table.Null == "NO" {
 			gormTagStr += "not null;"
-			//创建binding，主键不用创建binding，主键也不用指针
+			//创建binding，主键不用创建binding，主键也不用指针类型
 			if table.Key != "PRI" {
 				bindingStr += ",required"
 
