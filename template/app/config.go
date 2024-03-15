@@ -62,13 +62,17 @@ mysql:
   #以分为单位
   connMaxLifeTime: 5
 logger:
-  link-name: latest-log
-  encoding: json
   output-dir: logs
-  #文件最大保存时间，小时为单位
-  max-age: 720
-  #文件切割间隔，小时为单位
-  rotation-time: 24
+  filename: app.log
+  encoding: json
+  #文件最大保存时间，天为单位
+  maxage: 30
+  #文件最大大小，兆为单位
+  maxsize: 10
+  #文件保存数量，个为单位
+  maxbackups: 30
+  #是否压缩
+  compress: false
 jwt:
   sign-key: myjwt
   lifetime: 3600
