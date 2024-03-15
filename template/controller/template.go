@@ -14,9 +14,7 @@ type {{.controllerName}} struct {
 
 //列表
 func (ctrl *{{.controllerName}}) Index(c *app.Context){
-	Log.WithFields(Fields{
-		"title": "visit index",
-	}).Info("visit home index")
+	Log.With("title", "hello world").Info("visit home index")
 
 	c.JSON(200, app.H{
 		"title":  "visit index",
@@ -72,9 +70,7 @@ type {{.controllerName}} struct {
 
 //列表
 func (ctrl *{{.controllerName}}) Index(c *app.Context){
-	Log.WithFields(Fields{
-		"title": "hello world",
-	}).Info("visit home index")
+	Log.With("title", "hello world").Info("visit home index")
 
 	c.JSON(200, app.H{
 		"title":  "列表方法",
